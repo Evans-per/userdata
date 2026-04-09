@@ -1,0 +1,379 @@
+{
+  "info": {
+    "_postman_id": "usr-mgmt-api-collection",
+    "name": "User Management API — CRCE MongoDB Assignment",
+    "description": "Fr. Conceicao Rodrigues College of Engineering\nDepartment of Computer Engineering\n\nAll endpoints for the User Management System built with Node.js + MongoDB.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string",
+      "description": "Paste the _id of a created user here"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": ["{{baseUrl}}"],
+          "path": [""]
+        },
+        "description": "Check if the server is running and view all available endpoints."
+      }
+    },
+    {
+      "name": "CRUD Operations",
+      "item": [
+        {
+          "name": "POST — Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data._id) {",
+                  "  pm.collectionVariables.set('userId', json.data._id);",
+                  "  console.log('Saved _id:', json.data._id);",
+                  "}",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('success is true', () => pm.expect(json.success).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"age\": 24,\n  \"hobbies\": [\"reading\", \"gaming\"],\n  \"bio\": \"Test user who loves MongoDB and Node.js development\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Creates a new user. userId is auto-generated if not provided."
+          }
+        },
+        {
+          "name": "GET — All Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('success is true', () => pm.expect(json.success).to.be.true);",
+                  "pm.test('data is array', () => pm.expect(json.data).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Retrieves all users with pagination info."
+          }
+        },
+        {
+          "name": "GET — User by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success is true', () => pm.response.json().success === true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}"]
+            },
+            "description": "Get a single user by their MongoDB _id."
+          }
+        },
+        {
+          "name": "PUT — Update User by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success is true', () => pm.response.json().success === true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"age\": 26,\n  \"bio\": \"Updated bio: Now an expert in MongoDB indexes!\",\n  \"hobbies\": [\"reading\", \"gaming\", \"hiking\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}"]
+            },
+            "description": "Update any fields of a user by their MongoDB _id."
+          }
+        },
+        {
+          "name": "DELETE — Delete User by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('User deleted', () => pm.expect(pm.response.json().message).to.include('deleted'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{userId}}"]
+            },
+            "description": "Permanently delete a user by their MongoDB _id."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Querying & Filtering",
+      "item": [
+        {
+          "name": "Search by Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?name=Alice",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [{ "key": "name", "value": "Alice" }]
+            },
+            "description": "Case-insensitive partial name search using Single-field Index."
+          }
+        },
+        {
+          "name": "Filter by Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?email=alice@example.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [{ "key": "email", "value": "alice@example.com" }]
+            },
+            "description": "Filter users by exact email (uses compound index)."
+          }
+        },
+        {
+          "name": "Filter by Email + Age (Compound Index)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?email=alice@example.com&age=22",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "email", "value": "alice@example.com" },
+                { "key": "age", "value": "22" }
+              ]
+            },
+            "description": "Uses compound index on email + age."
+          }
+        },
+        {
+          "name": "Filter by Age Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?minAge=20&maxAge=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "minAge", "value": "20" },
+                { "key": "maxAge", "value": "30" }
+              ]
+            },
+            "description": "Filter users within an age range."
+          }
+        },
+        {
+          "name": "Filter by Hobby (Multikey Index)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?hobby=reading",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [{ "key": "hobby", "value": "reading" }]
+            },
+            "description": "Filter by hobby using multikey index on hobbies array."
+          }
+        },
+        {
+          "name": "Filter by Multiple Hobbies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?hobby=reading,cycling",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [{ "key": "hobby", "value": "reading,cycling" }]
+            },
+            "description": "Match users with any of the specified hobbies (comma-separated)."
+          }
+        },
+        {
+          "name": "Text Search on Bio (via query param)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?search=MongoDB",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [{ "key": "search", "value": "MongoDB" }]
+            },
+            "description": "Full-text search on the bio field using MongoDB text index."
+          }
+        },
+        {
+          "name": "Text Search on Bio (dedicated endpoint)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/search/text?q=Node.js",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "search", "text"],
+              "query": [{ "key": "q", "value": "Node.js" }]
+            },
+            "description": "Dedicated text search endpoint — results sorted by relevance score."
+          }
+        },
+        {
+          "name": "Pagination + Sorting",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=1&limit=3&sortBy=age&order=asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "3" },
+                { "key": "sortBy", "value": "age" },
+                { "key": "order", "value": "asc" }
+              ]
+            },
+            "description": "Paginated results sorted by age in ascending order."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Edge Cases & Validation",
+      "item": [
+        {
+          "name": "POST — Missing Required Fields",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"age\": 20\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Should return 400 with validation errors."
+          }
+        },
+        {
+          "name": "POST — Invalid Email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Invalid User\",\n  \"email\": \"not-an-email\",\n  \"userId\": \"uid-test\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Should return 400 with email validation error."
+          }
+        },
+        {
+          "name": "GET — Invalid ID Format",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/invalid-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "invalid-id"]
+            },
+            "description": "Should return 400 — invalid ObjectId format."
+          }
+        }
+      ]
+    }
+  ]
+}

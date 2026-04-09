@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #818cf8;
+      --secondary: #8b5cf6;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --surface-alt: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      overflow-y: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 24px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-content {
+      padding: 24px 0;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      margin: 4px 0;
+    }
+
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .sidebar-menu a:hover,
+    .sidebar-menu a.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      padding-left: 32px;
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+    }
+
+    /* Header */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-title h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .header-title p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-field,
+    .select-field {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      background: var(--surface);
+      color: var(--text-primary);
+    }
+
+    .input-field:focus,
+    .select-field:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--surface-alt);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .btn-danger {
+      background: var(--error);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background: #d97706;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    /* Table */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--surface-alt);
+      border-bottom: 2px solid var(--border);
+    }
+
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: var(--surface-alt);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-primary {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+
+    /* Actions */
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-btn-edit {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+
+    .action-btn-edit:hover {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .action-btn-delete {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+    }
+
+    .action-btn-delete:hover {
+      background: var(--error);
+      color: white;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-content {
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      background: var(--surface);
+      color: var(--text-primary);
+      font-family: inherit;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-error {
+      display: block;
+      color: var(--error);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .form-input.error {
+      border-color: var(--error);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .toast {
+      background: var(--surface);
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 300px;
+      animation: slideInRight 0.3s ease;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.success {
+      border-left-color: var(--success);
+    }
+
+    .toast.error {
+      border-left-color: var(--error);
+    }
+
+    .toast.warning {
+      border-left-color: var(--warning);
+    }
+
+    .toast.info {
+      border-left-color: var(--info);
+    }
+
+    .toast-icon {
+      font-size: 18px;
+      color: var(--text-secondary);
+    }
+
+    .toast.success .toast-icon {
+      color: var(--success);
+    }
+
+    .toast.error .toast-icon {
+      color: var(--error);
+    }
+
+    .toast.warning .toast-icon {
+      color: var(--warning);
+    }
+
+    .toast.info .toast-icon {
+      color: var(--info);
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      border: 3px solid var(--surface-alt);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      color: var(--border);
+      margin-bottom: 16px;
+    }
+
+    .empty-state-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .pagination-btn {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .pagination-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination-info {
+      color: var(--text-secondary);
+      font-size: 12px;
+      margin: 0 12px;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .stat-icon.blue {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+
+    .stat-icon.green {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .stat-icon.purple {
+      background: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+    }
+
+    .stat-content h3 {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        max-height: 60px;
+        display: flex;
+        align-items: center;
+      }
+
+      .sidebar-header {
+        padding: 12px 16px;
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom: none;
+      }
+
+      .sidebar-content {
+        display: none;
+      }
+
+      .controls-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .modal {
+        width: 95%;
+      }
+
+      table {
+        font-size: 12px;
+      }
+
+      td, th {
+        padding: 10px 12px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h1>
+          <i class="fas fa-users"></i>
+          UserHub
+        </h1>
+      </div>
+      <div class="sidebar-content">
+        <ul class="sidebar-menu">
+          <li><a href="#" class="active" data-section="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+          <li><a href="#" data-section="users"><i class="fas fa-users"></i> Users</a></li>
+          <li><a href="#" data-section="settings"><i class="fas fa-cog"></i> Settings</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+      <!-- Header -->
+      <div class="header">
+        <div class="header-title">
+          <h2>User Management</h2>
+          <p>Manage and organize all user information efficiently</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary" id="addUserBtn">
+            <i class="fas fa-plus"></i> Add User
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section-content">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon blue">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="stat-content">
+                <h3>Total Users</h3>
+                <div class="stat-value" id="totalUsersCount">0</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green">
+                <i class="fas fa-user-check"></i>
+              </div>
+              <div class="stat-content">
+                <h3>Active Today</h3>
+                <div class="stat-value">12</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon purple">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="stat-content">
+                <h3>New This Week</h3>
+                <div class="stat-value">5</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Recent Users</h3>
+            </div>
+            <div id="recentUsersContainer">
+              <div class="loading">
+                <div class="spinner"></div>
+                <span>Loading...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="users-section" class="section-content" style="display: none;">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">All Users</h3>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls-bar">
+              <div class="control-group">
+                <label class="control-label">Search by Name</label>
+                <input type="text" id="searchInput" class="input-field" placeholder="Type a name...">
+              </div>
+              <div class="control-group">
+                <label class="control-label">Filter by Age</label>
+                <select id="ageFilter" class="select-field">
+                  <option value="">All Ages</option>
+                  <option value="18-25">18-25</option>
+                  <option value="26-35">26-35</option>
+                  <option value="36-50">36-50</option>
+                  <option value="50+">50+</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label class="control-label">Sort by</label>
+                <select id="sortBy" class="select-field">
+                  <option value="name">Name (A-Z)</option>
+                  <option value="age">Age (Low to High)</option>
+                  <option value="recent">Recent First</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label class="control-label">Items per Page</label>
+                <select id="itemsPerPage" class="select-field">
+                  <option value="5">5</option>
+                  <option value="10" selected>10</option>
+                  <option value="15">15</option>
+                  <option value="20">20</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrapper">
+              <div id="usersContainer">
+                <div class="loading">
+                  <div class="spinner"></div>
+                  <span>Loading users...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pagination -->
+            <div id="paginationContainer" style="display: none;">
+              <div class="pagination">
+                <button class="pagination-btn" id="prevBtn" onclick="previousPage()">← Previous</button>
+                <div class="pagination-info">
+                  <span id="pageInfo">Page 1</span>
+                </div>
+                <button class="pagination-btn" id="nextBtn" onclick="nextPage()">Next →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit User Modal -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Add New User</h3>
+        <button class="modal-close" onclick="closeUserModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="userForm" onsubmit="saveUser(event)">
+        <div class="modal-content">
+          <div class="form-group">
+            <label class="form-label" for="userName">Full Name <span style="color: var(--error);">*</span></label>
+            <input type="text" id="userName" class="form-input" placeholder="John Doe" required>
+            <span class="form-error" id="nameError"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="userEmail">Email <span style="color: var(--error);">*</span></label>
+            <input type="email" id="userEmail" class="form-input" placeholder="john@example.com" required>
+            <span class="form-error" id="emailError"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="userAge">Age <span style="color: var(--error);">*</span></label>
+            <input type="number" id="userAge" class="form-input" placeholder="25" min="1" max="120" required>
+            <span class="form-error" id="ageError"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="userHobbies">Hobbies</label>
+            <input type="text" id="userHobbies" class="form-input" placeholder="Reading, Gaming, etc.">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="userBio">Bio</label>
+            <textarea id="userBio" class="form-textarea" placeholder="Tell us about yourself..." rows="4"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <i class="fas fa-check"></i> Save User
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Delete User</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        <p style="color: var(--text-secondary); line-height: 1.8;">
+          Are you sure you want to delete this user? This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmDelete()">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // Configuration
+    const API_BASE_URL = 'http://localhost:5000/api/users';
+
+    // State
+    let allUsers = [];
+    let filteredUsers = [];
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let editingUserId = null;
+    let deleteUserId = null;
+    let isLoading = false;
+
+    // ==================== Initialization ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      setupEventListeners();
+      loadUsers();
+    });
+
+    function setupEventListeners() {
+      // Sidebar navigation
+      document.querySelectorAll('.sidebar-menu a').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const section = link.dataset.section;
+          switchSection(section);
+          document.querySelectorAll('.sidebar-menu a').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        });
+      });
+
+      // Add user button
+      document.getElementById('addUserBtn').addEventListener('click', () => openUserModal());
+
+      // Search and filter
+      document.getElementById('searchInput').addEventListener('input', applyFilters);
+      document.getElementById('ageFilter').addEventListener('change', applyFilters);
+      document.getElementById('sortBy').addEventListener('change', applyFilters);
+      document.getElementById('itemsPerPage').addEventListener('change', (e) => {
+        itemsPerPage = parseInt(e.target.value);
+        currentPage = 1;
+        applyFilters();
+      });
+
+      // Modal close on overlay click
+      document.getElementById('userModal').addEventListener('click', (e) => {
+        if (e.target.id === 'userModal') closeUserModal();
+      });
+
+      document.getElementById('deleteModal').addEventListener('click', (e) => {
+        if (e.target.id === 'deleteModal') closeDeleteModal();
+      });
+    }
+
+    function switchSection(section) {
+      document.querySelectorAll('.section-content').forEach(el => el.style.display = 'none');
+      document.getElementById(`${section}-section`).style.display = 'block';
+
+      if (section === 'users') {
+        applyFilters();
+      }
+    }
+
+    // ==================== API Calls ====================
+    async function loadUsers() {
+      if (isLoading) return;
+      isLoading = true;
+
+      try {
+        const response = await fetch(API_BASE_URL);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to fetch users');
+        }
+
+        const data = await response.json();
+        allUsers = Array.isArray(data) ? data : data.data || [];
+        updateDashboard();
+        applyFilters();
+        showToast('Users loaded successfully', 'success');
+      } catch (error) {
+        console.error('Error loading users:', error);
+        showToast('Failed to load users: ' + error.message, 'error');
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    async function saveUser(event) {
+      event.preventDefault();
+
+      if (!validateForm()) return;
+
+      const hobbiesValue = document.getElementById('userHobbies').value.trim();
+      const userData = {
+        name: document.getElementById('userName').value.trim(),
+        email: document.getElementById('userEmail').value.trim(),
+        age: parseInt(document.getElementById('userAge').value),
+        // Keep hobbies as a string
+        hobbies: hobbiesValue,
+        bio: document.getElementById('userBio').value.trim()
+      };
+
+      // Debug logging
+      console.log('Saving user with hobbies:', userData.hobbies);
+
+      try {
+        let response;
+        const options = {
+          method: editingUserId ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData)
+        };
+
+        if (editingUserId) {
+          response = await fetch(`${API_BASE_URL}/${editingUserId}`, options);
+        } else {
+          response = await fetch(API_BASE_URL, options);
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          const errorMsg = errorData.message || errorData.errors?.join(', ') || 'Failed to save user';
+          throw new Error(errorMsg);
+        }
+
+        const result = await response.json();
+        console.log('Save result:', result);
+
+        closeUserModal();
+        await loadUsers();
+        showToast(editingUserId ? 'User updated successfully' : 'User added successfully', 'success');
+      } catch (error) {
+        console.error('Error saving user:', error);
+        showToast('Failed to save user: ' + error.message, 'error');
+      }
+    }
+
+    async function deleteUser(userId) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/${userId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to delete user');
+        }
+
+        closeDeleteModal();
+        await loadUsers();
+        showToast('User deleted successfully', 'success');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        showToast('Failed to delete user: ' + error.message, 'error');
+      }
+    }
+
+    // ==================== UI Functions ====================
+    function openUserModal(userId = null) {
+      editingUserId = userId;
+      document.getElementById('userForm').reset();
+      document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
+      document.querySelectorAll('.form-input, .form-textarea').forEach(el => el.classList.remove('error'));
+
+      if (userId) {
+        const user = allUsers.find(u => u._id === userId);
+        if (user) {
+          document.getElementById('modalTitle').textContent = 'Edit User';
+          document.getElementById('userName').value = user.name;
+          document.getElementById('userEmail').value = user.email;
+          document.getElementById('userAge').value = user.age;
+          // Display hobbies as string
+          document.getElementById('userHobbies').value = user.hobbies || '';
+          document.getElementById('userBio').value = user.bio || '';
+          document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check"></i> Update User';
+        }
+      } else {
+        document.getElementById('modalTitle').textContent = 'Add New User';
+        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check"></i> Add User';
+      }
+
+      document.getElementById('userModal').classList.add('active');
+    }
+
+    function closeUserModal() {
+      document.getElementById('userModal').classList.remove('active');
+      editingUserId = null;
+    }
+
+    function openDeleteModal(userId) {
+      deleteUserId = userId;
+      document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('active');
+      deleteUserId = null;
+    }
+
+    function confirmDelete() {
+      if (deleteUserId) {
+        deleteUser(deleteUserId);
+      }
+    }
+
+    function validateForm() {
+      let isValid = true;
+      const name = document.getElementById('userName').value.trim();
+      const email = document.getElementById('userEmail').value.trim();
+      const age = document.getElementById('userAge').value;
+
+      // Name validation
+      if (!name) {
+        showFieldError('nameError', 'Name is required');
+        isValid = false;
+      } else if (name.length < 2) {
+        showFieldError('nameError', 'Name must be at least 2 characters');
+        isValid = false;
+      } else {
+        clearFieldError('nameError');
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email) {
+        showFieldError('emailError', 'Email is required');
+        isValid = false;
+      } else if (!emailRegex.test(email)) {
+        showFieldError('emailError', 'Please enter a valid email');
+        isValid = false;
+      } else {
+        clearFieldError('emailError');
+      }
+
+      // Age validation
+      if (!age || age < 1 || age > 120) {
+        showFieldError('ageError', 'Please enter a valid age');
+        isValid = false;
+      } else {
+        clearFieldError('ageError');
+      }
+
+      return isValid;
+    }
+
+    function showFieldError(fieldId, message) {
+      const errorEl = document.getElementById(fieldId);
+      errorEl.textContent = message;
+      const inputId = fieldId.replace('Error', '');
+      document.getElementById('user' + inputId.charAt(0).toUpperCase() + inputId.slice(1)).classList.add('error');
+    }
+
+    function clearFieldError(fieldId) {
+      document.getElementById(fieldId).textContent = '';
+    }
+
+    // ==================== Data Filtering & Display ====================
+    function applyFilters() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const ageFilter = document.getElementById('ageFilter').value;
+      const sortBy = document.getElementById('sortBy').value;
+
+      filteredUsers = allUsers.filter(user => {
+        // Search filter
+        if (searchTerm && !user.name.toLowerCase().includes(searchTerm)) {
+          return false;
+        }
+
+        // Age filter
+        if (ageFilter) {
+          const age = user.age;
+          switch (ageFilter) {
+            case '18-25': if (age < 18 || age > 25) return false; break;
+            case '26-35': if (age < 26 || age > 35) return false; break;
+            case '36-50': if (age < 36 || age > 50) return false; break;
+            case '50+': if (age <= 50) return false; break;
+          }
+        }
+
+        return true;
+      });
+
+      // Sorting
+      switch (sortBy) {
+        case 'name':
+          filteredUsers.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'age':
+          filteredUsers.sort((a, b) => a.age - b.age);
+          break;
+        case 'recent':
+          filteredUsers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          break;
+      }
+
+      currentPage = 1;
+      displayUsers();
+    }
+
+    function displayUsers() {
+      const container = document.getElementById('usersContainer');
+
+      if (filteredUsers.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <i class="fas fa-inbox"></i>
+            </div>
+            <div class="empty-state-title">No Users Found</div>
+            <p>Try adjusting your search or filter criteria.</p>
+          </div>
+        `;
+        document.getElementById('paginationContainer').style.display = 'none';
+        return;
+      }
+
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const paginatedUsers = filteredUsers.slice(start, end);
+      const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Age</th>
+              <th>Hobbies</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      paginatedUsers.forEach(user => {
+        // Format hobbies display - now just a string
+        let hobbiesDisplay = '-';
+        if (user.hobbies) {
+          const hobbiesStr = String(user.hobbies);
+          hobbiesDisplay = hobbiesStr.length > 30 ? hobbiesStr.substring(0, 30) + '...' : hobbiesStr;
+        }
+
+        html += `
+          <tr>
+            <td>
+              <strong>${user.name}</strong>
+            </td>
+            <td>${user.email}</td>
+            <td>
+              <span class="badge badge-primary">${user.age}</span>
+            </td>
+            <td>${hobbiesDisplay}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn action-btn-edit" onclick="openUserModal('${user._id}')" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn action-btn-delete" onclick="openDeleteModal('${user._id}')" title="Delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = html;
+
+      // Update pagination
+      if (totalPages > 1) {
+        document.getElementById('paginationContainer').style.display = 'block';
+        document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages} (${filteredUsers.length} total)`;
+        document.getElementById('prevBtn').disabled = currentPage === 1;
+        document.getElementById('nextBtn').disabled = currentPage === totalPages;
+      } else {
+        document.getElementById('paginationContainer').style.display = 'none';
+      }
+    }
+
+    function nextPage() {
+      const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        displayUsers();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function previousPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        displayUsers();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function updateDashboard() {
+      document.getElementById('totalUsersCount').textContent = allUsers.length;
+
+      // Display recent users in dashboard
+      const recentUsers = allUsers.slice(0, 5);
+      const container = document.getElementById('recentUsersContainer');
+
+      if (recentUsers.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No users yet</p></div>';
+        return;
+      }
+
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Age</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      recentUsers.forEach(user => {
+        html += `
+          <tr>
+            <td><strong>${user.name}</strong></td>
+            <td>${user.email}</td>
+            <td><span class="badge badge-primary">${user.age}</span></td>
+            <td>
+              <button class="btn btn-small btn-secondary" onclick="openUserModal('${user._id}')">
+                Edit
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    // ==================== Toast Notifications ====================
+    function showToast(message, type = 'info', duration = 3000) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+
+      const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+      };
+
+      toast.innerHTML = `
+        <div class="toast-icon">
+          <i class="fas ${icons[type]}"></i>
+        </div>
+        <div>${message}</div>
+      `;
+
+      document.getElementById('toastContainer').appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'slideInRight 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+  </script>
+</body>
+
+</html>
