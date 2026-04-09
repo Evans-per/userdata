@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "npm install",
   "builds": [
     {
       "src": "server.js",
@@ -13,16 +12,8 @@
       "dest": "server.js"
     },
     {
-      "src": "/public/(.*)",
-      "dest": "public/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "public/index.html"
+      "dest": "server.js"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
-
