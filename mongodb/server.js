@@ -43,11 +43,16 @@ app.use((req, _res, next) => {
 // ─────────────────────────────────────────────
 app.use('/api/users', require('./routes/userRoutes'));
 
-// Health check
+// Health check with detailed debugging
 app.get('/', (req, res) => {
+  const mongoConnected =!!require('mongoose').connection.db;
+  
   res.json({
     success: true,
     message: '🚀 User Management API is running',
+    environment: process.env.NODE_ENV || 'development',
+    mongoDBConnected: mongoConnected,
+    onVercel: process.env.VERCEL === '1',
     college: 'Fr. Conceicao Rodrigues College of Engineering',
     department: 'Computer Engineering',
     version: '1.0.0',
@@ -89,9 +94,16 @@ app.use((err, req, res, _next) => {
 // ─────────────────────────────────────────────
 //  Start Server
 // ─────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📖 API Docs: http://localhost:${PORT}/`);
-  console.log(`🌿 Environment: ${process.env.NODE_ENV || 'development'}\n`);
-});
+
+// Export for Vercel serverless functions
+module.exports = app;
+
+// For local development: listen on port if not in Vercel environment
+if (process.env.VERCEL !== '1') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`\n🚀 Server running on http://localhost:${PORT}`);
+    console.log(`📖 API Docs: http://localhost:${PORT}/`);
+    console.log(`🌿 Environment: ${process.env.NODE_ENV || 'development'}\n`);
+  });
+}
