@@ -5,18 +5,14 @@
       "src": "server.js",
       "use": "@vercel/node",
       "config": {
-        "maxLambdaSize": "50mb",
-        "includeFiles": "public/**"
+        "nodeVersion": "18.x"
       }
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "(.*)",
       "dest": "server.js"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
